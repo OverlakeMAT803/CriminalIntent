@@ -17,63 +17,67 @@ import java.util.List;
 
 public class CrimeListFragment extends Fragment {
 
+    public static final String CRIME_LIST_FRAGMENT = "crime_list_fragment";
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        // Find our layout resource (fragment_crime_list.xml) and inflate it into a view object
         View view = inflater.inflate(R.layout.fragment_crime_list,container,false);
+
+        // Locate the RecyclerView within the view object
         mCrimeRecyclerView = view.findViewById(R.id.crime_recycler_view);
+
+        // All recycler views need a layout manager to work. We'll use android's
+        // provided LinearLayoutManager. LinearLayoutManager requires the context in which
+        // it is working. Note that I can just as well pass in getActivity() as getContext()
+        // getActivity() refers to the parent activity (CrimeListActivity) which is itself
+        // a context.
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        updateUI();
+
+        // Create a new RecyclerView.Adapter. This adapter is what translates
+        // the data into views the RecyclerView can use (and recycle).
+        mAdapter = new CrimeAdapter();
+
+        // Tell our RecyclerView to use this adapter.
+        mCrimeRecyclerView.setAdapter(mAdapter);
+
+        // Return the view that CONTAINS the RecyclerView.
         return view;
     }
 
-    private void updateUI(){
-        CrimeLab crimeLab = CrimeLab.get(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
-    }
-
-    private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView mTitleTextView;
-        private TextView mDateTextView;
-        private Crime mCrime;
-
-        public void bind(Crime crime){
-            mCrime = crime;
-            mTitleTextView.setText(mCrime.getTitle());
-            mDateTextView.setText(mCrime.getDate().toString());
-        }
-
-
-        public CrimeHolder(LayoutInflater inflater, ViewGroup parent){
-            super(inflater.inflate(R.layout.list_item_crime,parent,false));
-            itemView.setOnClickListener(this);
-            mTitleTextView = itemView.findViewById(R.id.crime_title);
-            mDateTextView = itemView.findViewById(R.id.crime_date);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(),mCrime.getTitle() + " clicked!",Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
-        private List<Crime> mCrimes;
 
-        public CrimeAdapter(List<Crime> crimes){
-            mCrimes = crimes;
+        private List<Crime> mCrimes;
+        private LayoutInflater mInflater;
+
+        public CrimeAdapter(){
+            // Since the adapter is tho only object that needs to know about the data,
+            // let's initialize the dataset here instead.
+            initDataset();
+
+            // Rather then create a new LayoutInflater every time OnCreateViewHolder() is called,
+            // let's create it once and reuse it! Technically we could have saved the LayoutInflater
+            // passed to onCreateView() to a member variable on CrimeListFragment (which would be
+            // accessible here), but this keeps CrimeAdapter encapsulated.
+            mInflater = LayoutInflater.from(getActivity());
+        }
+
+        // A private helper method to initialize the field that holds our dataset.
+        private void initDataset(){
+            // Retrieve data source (a singleton in this example)
+            CrimeLab crimeLab = CrimeLab.get(getActivity());
+            // Set the dataset field (mCrimes)
+            mCrimes = crimeLab.getCrimes();
         }
 
         @NonNull
         @Override
         public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new CrimeHolder(layoutInflater, parent);
+            return new CrimeHolder(mInflater, parent);
         }
 
         @Override
@@ -86,5 +90,37 @@ public class CrimeListFragment extends Fragment {
         public int getItemCount() {
             return mCrimes.size();
         }
+
     }
+
+    private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private TextView mTitleTextView;
+        private TextView mDateTextView;
+        private Crime mCrime;
+
+        public CrimeHolder(LayoutInflater inflater, ViewGroup parent){
+            super(inflater.inflate(R.layout.list_item_crime,parent,false));
+
+            // itemView is a member variable belonging to RecyclerView.ViewHolder and is set when
+            // super() is called above. It IS the inflated individual crime view.
+            itemView.setOnClickListener(this);
+            mTitleTextView = itemView.findViewById(R.id.crime_title);
+            mDateTextView = itemView.findViewById(R.id.crime_date);
+        }
+
+        public void bind(Crime crime){
+            mCrime = crime;
+            mTitleTextView.setText(mCrime.getTitle());
+            mDateTextView.setText(mCrime.getDate().toString());
+        }
+
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(getActivity(),mCrime.getTitle() + " clicked!",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
 }
