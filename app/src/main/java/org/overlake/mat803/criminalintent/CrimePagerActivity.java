@@ -45,5 +45,13 @@ public class CrimePagerActivity extends AppCompatActivity {
                 return mCrimeLab.size();
             }
         });
+
+        UUID crimeID = (UUID) getIntent().getSerializableExtra(EXTRA_CRIME_ID);
+        for(int i = 0; i < mCrimeLab.size(); i++){
+            if(mCrimeLab.get(i).getID().equals(crimeID)){
+                mViewPager.setCurrentItem(i);
+                break;
+            }
+        }
     }
 }
