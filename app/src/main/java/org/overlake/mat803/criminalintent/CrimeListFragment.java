@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,8 +25,10 @@ import java.util.List;
 public class CrimeListFragment extends Fragment {
 
     public static final String CRIME_LIST_FRAGMENT = "crime_list_fragment";
+    public static final String SAVED_SUBTITLE_VISIBLE = "subtitle_shown";
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
+    private boolean mSubtitleIsShown;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,6 +42,10 @@ public class CrimeListFragment extends Fragment {
 
         // Find our layout resource (fragment_crime_list.xml) and inflate it into a view object
         View view = inflater.inflate(R.layout.fragment_crime_list,container,false);
+
+        if(savedInstanceState != null){
+            mSubtitleIsShown = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
+        }
 
         // Locate the RecyclerView within the view object
         mCrimeRecyclerView = view.findViewById(R.id.crime_recycler_view);
@@ -146,6 +153,10 @@ public class CrimeListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_crime_list, menu);
+
+        MenuItem subtitleItem = menu.findItem(R.id.show_subtitle);
+        int subtitleText = mSubtitleIsShown ? R.string.hide_subtitle : R.string.show_subtitle;
+        subtitleItem.setTitle(subtitleText);
     }
 
     @Override
@@ -157,7 +168,31 @@ public class CrimeListFragment extends Fragment {
                 Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getID());
                 startActivity(intent);
                 return true;
+            case R.id.show_subtitle:
+                mSubtitleIsShown = !mSubtitleIsShown;
+                getActivity().invalidateOptionsMenu();
+                updateSubtitle();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void updateSubtitle(){
+        int crimeCount = CrimeLab.get(getActivity()).size();
+
+        String subtitle = null;
+        if(mSubtitleIsShown){
+            subtitle = getString(R.string.crime_count, crimeCount);
+        }
+
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setSubtitle(subtitle);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleIsShown);
     }
 }
