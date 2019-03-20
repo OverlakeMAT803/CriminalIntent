@@ -2,9 +2,11 @@ package org.overlake.mat803.criminalintent;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import org.overlake.mat803.criminalintent.database.CrimeBaseHelper;
+import org.overlake.mat803.criminalintent.database.CrimeCursorWrapper;
 import org.overlake.mat803.criminalintent.database.CrimeDbSchema;
 import org.overlake.mat803.criminalintent.database.CrimeDbSchema.CrimeTable;
 
@@ -44,7 +46,21 @@ public class CrimeLab {
 
 
     public List<Crime> getCrimes(){
-        return new ArrayList<>();
+        List<Crime> crimes = new ArrayList<>();
+
+        CrimeCursorWrapper cursor = queryCrimes(null,null);
+
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()){
+                crimes.add(cursor.getCrime());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+
+        return crimes;
     }
 
     public Crime getCrime(UUID id){
@@ -74,6 +90,17 @@ public class CrimeLab {
         return values;
     }
 
-
+    private CrimeCursorWrapper queryCrimes(String whereClause, String[] whereArgs){
+        Cursor cursor = mDatabase.query(
+                CrimeTable.NAME,
+                null,
+                whereClause,
+                whereArgs,
+                null,
+                null,
+                null
+        );
+        return new CrimeCursorWrapper(cursor);
+    }
 
 }
