@@ -23,7 +23,6 @@ public class CrimeLab {
     private CrimeLab(Context context){
         mContext = context.getApplicationContext();
         mDatabase = new CrimeBaseHelper(mContext).getWritableDatabase();
-
     }
 
 
@@ -35,18 +34,35 @@ public class CrimeLab {
     }
 
     public Crime get(int i){
-        return getCrimes().get(i);
+        CrimeCursorWrapper cursor = getCursor();
+        cursor.moveToPosition(i);
+        return cursor.getCrime();
     }
 
     public int size(){
-        return getCrimes().size();
+        // TODO
+        CrimeCursorWrapper cursor = getCursor();
+        int count = 0;
+        try {
+            count = cursor.getCount();
+        } finally {
+            cursor.close();
+        }
+        return count;
     }
 
+    private CrimeCursorWrapper getCursor(){
+        return queryCrimes(null,null);
+    }
+
+    private CrimeCursorWrapper getCursor(String whereClause, String[] whereArgs){
+        return queryCrimes(whereClause, whereArgs);
+    }
 
     public List<Crime> getCrimes(){
         List<Crime> crimes = new ArrayList<>();
 
-        CrimeCursorWrapper cursor = queryCrimes(null,null);
+        CrimeCursorWrapper cursor = getCursor();
 
         try {
             cursor.moveToFirst();
