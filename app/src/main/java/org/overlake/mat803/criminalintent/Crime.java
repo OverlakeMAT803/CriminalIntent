@@ -1,5 +1,7 @@
 package org.overlake.mat803.criminalintent;
 
+import android.net.Uri;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -9,6 +11,17 @@ public class Crime {
     private String mTitle;
     private Date mDate;
     private boolean mSolved;
+    private int mSuspectId;
+
+    public int getSuspectId() {
+        return mSuspectId;
+    }
+
+    public void setSuspectId(int suspectId) {
+        mSuspectId = suspectId;
+    }
+
+
 
     public Crime(){
         this(UUID.randomUUID());
