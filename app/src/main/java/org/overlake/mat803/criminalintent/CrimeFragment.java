@@ -1,5 +1,6 @@
 package org.overlake.mat803.criminalintent;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -41,11 +43,15 @@ public class CrimeFragment extends Fragment {
     private Button mReportButton;
     private Button mSuspectButton;
     private Button mCallSuspect;
+    private String mSuspectName;
+    private int mSuspectId;
+    private Uri mSuspectPhone;
 
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "date";
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
+    private static final int REQUEST_READ_CONTACTS = 1000;
 
 
     public static CrimeFragment newInstance(UUID crimeId){
@@ -62,7 +68,10 @@ public class CrimeFragment extends Fragment {
         UUID crimeID = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeID);
         setHasOptionsMenu(true);
+        requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+                REQUEST_READ_CONTACTS);
     }
+
 
     @Nullable
     @Override
@@ -148,7 +157,10 @@ public class CrimeFragment extends Fragment {
         mCallSuspect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String phone = getSuspectPhone();
+                String phone = "tel:" + getSuspectPhone();
+                Uri number = Uri.parse(phone);
+                Intent intent = new Intent(Intent.ACTION_DIAL, number);
+                startActivity(intent);
             }
         });
 
@@ -177,42 +189,48 @@ public class CrimeFragment extends Fragment {
 
     }
 
-    private String getSuspectName(){
-        if(mCrime.getSuspectId() == 0){
+    public String getSuspectName(){
+        if(mCrime.getSuspectUri().toString().equals("")){
             return null;
         }
         String[] queryFields = new String[] {
-                ContactsContract.Contacts.DISPLAY_NAME
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.Contacts._ID
         };
-        Cursor c = getActivity().getContentResolver().query(mCrime.getSuspectId(), queryFields, null, null, null);
+        Cursor c = getActivity().getContentResolver().query(mCrime.getSuspectUri(), queryFields, null, null, null);
 
         try{
             if(c.getCount() == 0){
                 return null;
             }
             c.moveToFirst();
-            return c.getString(0);
+            mSuspectName =c.getString(0);
+
+            mSuspectId = c.getInt(1);
 
         } finally {
             c.close();
         }
+        return mSuspectName;
     }
 
-    private String getSuspectPhone(){
-        if(mCrime.getSuspectId() == 0){
+    public  String getSuspectPhone(){
+        if(mCrime.getSuspectUri().toString().equals("")){
             return null;
         }
-        String[] queryFields = new String[] {
-                ContactsContract.Contacts._ID
-        };
-        Cursor c = getActivity().getContentResolver().query(mCrime.getSuspectId(), queryFields, null, null, null);
+
+        Cursor c = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null,
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + mSuspectId,
+                null,
+                null);
 
         try{
             if(c.getCount() == 0){
                 return null;
             }
             c.moveToFirst();
-            return c.getString(0);
+            return c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
         } finally {
             c.close();

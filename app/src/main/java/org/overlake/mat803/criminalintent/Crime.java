@@ -11,14 +11,14 @@ public class Crime {
     private String mTitle;
     private Date mDate;
     private boolean mSolved;
-    private int mSuspectId;
+    private Uri mSuspectUri;
 
-    public int getSuspectId() {
-        return mSuspectId;
+    public Uri getSuspectUri() {
+        return mSuspectUri;
     }
 
-    public void setSuspectId(int suspectId) {
-        mSuspectId = suspectId;
+    public void setSuspectUri(Uri suspectUri) {
+        mSuspectUri = suspectUri;
     }
 
 

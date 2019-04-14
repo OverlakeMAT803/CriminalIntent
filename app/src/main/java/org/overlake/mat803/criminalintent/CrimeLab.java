@@ -23,7 +23,6 @@ public class CrimeLab {
     private CrimeLab(Context context){
         mContext = context.getApplicationContext();
         mDatabase = new CrimeBaseHelper(mContext).getWritableDatabase();
-
     }
 
 
@@ -35,18 +34,35 @@ public class CrimeLab {
     }
 
     public Crime get(int i){
-        return getCrimes().get(i);
+        CrimeCursorWrapper cursor = getCursor();
+        cursor.moveToPosition(i);
+        return cursor.getCrime();
     }
 
     public int size(){
-        return getCrimes().size();
+        // TODO
+        CrimeCursorWrapper cursor = getCursor();
+        int count = 0;
+        try {
+            count = cursor.getCount();
+        } finally {
+            cursor.close();
+        }
+        return count;
     }
 
+    private CrimeCursorWrapper getCursor(){
+        return queryCrimes(null,null);
+    }
+
+    private CrimeCursorWrapper getCursor(String whereClause, String[] whereArgs){
+        return queryCrimes(whereClause, whereArgs);
+    }
 
     public List<Crime> getCrimes(){
         List<Crime> crimes = new ArrayList<>();
 
-        CrimeCursorWrapper cursor = queryCrimes(null,null);
+        CrimeCursorWrapper cursor = getCursor();
 
         try {
             cursor.moveToFirst();
@@ -79,12 +95,17 @@ public class CrimeLab {
         }
     }
 
+    public void delete(Crime c){
+        mDatabase.delete(CrimeTable.NAME, CrimeTable.Cols.UUID + " = ?",
+                new String[] { c.getID().toString() });
+    }
+
     public void updateCrime(Crime c){
         String uuid = c.getID().toString();
         ContentValues values = getContentValues(c);
 
         mDatabase.update(CrimeTable.NAME, values,
-                CrimeTable.Cols.UUID + " = " + uuid,
+                CrimeTable.Cols.UUID + " = ?",
                 new String[] { uuid });
     }
 
@@ -99,6 +120,11 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.TITLE, c.getTitle());
         values.put(CrimeTable.Cols.DATE, c.getDate().getTime());
         values.put(CrimeTable.Cols.SOLVED, c.isSolved() ? 1 : 0);
+        if(c.getSuspectUri() != null) {
+            values.put(CrimeTable.Cols.SUSPECT_URI, c.getSuspectUri().toString());
+        } else {
+            values.put(CrimeTable.Cols.SUSPECT_URI, new String());
+        }
         return values;
     }
 
