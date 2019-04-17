@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import org.overlake.mat803.criminalintent.database.CrimeBaseHelper;
 import org.overlake.mat803.criminalintent.database.CrimeCursorWrapper;
-import org.overlake.mat803.criminalintent.database.CrimeDbSchema;
 import org.overlake.mat803.criminalintent.database.CrimeDbSchema.CrimeTable;
 
 
@@ -120,11 +119,7 @@ public class CrimeLab {
         values.put(CrimeTable.Cols.TITLE, c.getTitle());
         values.put(CrimeTable.Cols.DATE, c.getDate().getTime());
         values.put(CrimeTable.Cols.SOLVED, c.isSolved() ? 1 : 0);
-        if(c.getSuspectUri() != null) {
-            values.put(CrimeTable.Cols.SUSPECT_URI, c.getSuspectUri().toString());
-        } else {
-            values.put(CrimeTable.Cols.SUSPECT_URI, new String());
-        }
+        values.put(CrimeTable.Cols.SUSPECT_ID, c.getSuspectId());
         return values;
     }
 

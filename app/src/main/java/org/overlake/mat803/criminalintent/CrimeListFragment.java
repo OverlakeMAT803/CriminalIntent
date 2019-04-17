@@ -109,7 +109,6 @@ public class CrimeListFragment extends Fragment {
         public int getItemCount() {
             return mCrimes.size();
         }
-
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -146,7 +145,9 @@ public class CrimeListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mAdapter.initDataset();
         mAdapter.notifyDataSetChanged();
+
     }
 
     @Override
@@ -197,4 +198,5 @@ public class CrimeListFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleIsShown);
     }
+
 }
