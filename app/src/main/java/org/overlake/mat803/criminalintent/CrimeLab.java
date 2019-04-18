@@ -4,12 +4,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
 import org.overlake.mat803.criminalintent.database.CrimeBaseHelper;
 import org.overlake.mat803.criminalintent.database.CrimeCursorWrapper;
 import org.overlake.mat803.criminalintent.database.CrimeDbSchema.CrimeTable;
 
 
+import java.io.File;
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -92,6 +95,16 @@ public class CrimeLab {
         } finally {
             cursor.close();
         }
+    }
+
+    public File getPhotoFile(Crime crime){
+        File externalFilesDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if(externalFilesDir == null){
+            return null;
+        }
+
+        return new File(externalFilesDir, crime.getPhotoFilename());
     }
 
     public void delete(Crime c){

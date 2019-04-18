@@ -21,7 +21,9 @@ public class Crime {
         mSuspectId = suspectId;
     }
 
-
+    public String getPhotoFilename(){
+        return "IMG_" + getID() + ".jpg";
+    }
 
     public Crime(){
         this(UUID.randomUUID());
