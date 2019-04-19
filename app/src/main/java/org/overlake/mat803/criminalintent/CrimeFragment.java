@@ -369,9 +369,9 @@ public class CrimeFragment extends Fragment {
         String dateString = DateFormat.format(dateFormat,mCrime.getDate()).toString();
 
         String suspectName = getSuspectName();
-        int crimeStringResId = suspectName == null ?
-                R.string.crime_report_no_suspect : R.string.crime_report_suspect;
-        return getString(R.string.crime_report,mCrime.getTitle(), dateString, solvedString, suspectName);
+        String crimeString = suspectName == null ?
+                getString(R.string.crime_report_no_suspect) : getString(R.string.crime_report_suspect, suspectName);
+        return getString(R.string.crime_report,mCrime.getTitle(), dateString, solvedString, crimeString);
 
     }
 
