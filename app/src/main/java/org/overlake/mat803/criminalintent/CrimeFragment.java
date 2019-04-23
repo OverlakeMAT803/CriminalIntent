@@ -68,6 +68,7 @@ public class CrimeFragment extends Fragment {
 
     public interface Callbacks {
         void onCrimeUpdated(Crime crime);
+        void onDeleteCrime();
     }
 
     public void onAttach(Context context){
@@ -118,6 +119,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 mCrime.setTitle(s.toString());
+                mCallbacks.onCrimeUpdated(mCrime);
             }
 
             @Override
@@ -144,6 +146,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                mCallbacks.onCrimeUpdated(mCrime);
             }
         });
 
@@ -249,6 +252,7 @@ public class CrimeFragment extends Fragment {
                 Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
                 mCrime.setDate(date);
                 updateDate();
+                mCallbacks.onCrimeUpdated(mCrime);
                 break;
             case REQUEST_CONTACT:
                 if(data != null){
@@ -360,8 +364,9 @@ public class CrimeFragment extends Fragment {
         switch (item.getItemId()){
             case R.id.delete_crime:
                 CrimeLab.get(getActivity()).delete(mCrime);
-                getActivity().finish();
-                return  true;
+                mCallbacks.onCrimeUpdated(mCrime);
+                mCallbacks.onDeleteCrime();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
 
