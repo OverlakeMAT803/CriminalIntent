@@ -2,6 +2,7 @@ package org.overlake.mat803.criminalintent;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -56,7 +57,7 @@ public class CrimeFragment extends Fragment {
     private ImageButton mPhotoButton;
     private ImageView mPhotoView;
     private File mPhotoFile;
-
+    private Callbacks mCallbacks;
 
     private static final String ARG_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "date";
@@ -65,6 +66,19 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_READ_CONTACTS = 1000;
     public static final int REQUEST_PHOTO = 2;
 
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
+
+    public void onAttach(Context context){
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    public void onDetach(){
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     public static CrimeFragment newInstance(UUID crimeId){
         Bundle args = new Bundle();
