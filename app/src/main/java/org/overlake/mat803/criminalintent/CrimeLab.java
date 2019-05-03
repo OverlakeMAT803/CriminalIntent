@@ -3,16 +3,15 @@ package org.overlake.mat803.criminalintent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
 
 import org.overlake.mat803.criminalintent.database.CrimeBaseHelper;
 import org.overlake.mat803.criminalintent.database.CrimeCursorWrapper;
 import org.overlake.mat803.criminalintent.database.CrimeDbSchema.CrimeTable;
-
+import org.overlake.mat803.criminalintent.database.CrimeDbSchema.SuspectTable;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -57,10 +56,6 @@ public class CrimeLab {
         return queryCrimes(null,null);
     }
 
-    private CrimeCursorWrapper getCursor(String whereClause, String[] whereArgs){
-        return queryCrimes(whereClause, whereArgs);
-    }
-
     public List<Crime> getCrimes(){
         List<Crime> crimes = new ArrayList<>();
 
@@ -81,12 +76,11 @@ public class CrimeLab {
 
     public Crime getCrime(UUID id){
         CrimeCursorWrapper cursor = queryCrimes(
-                CrimeTable.Cols.UUID + " = ?",
+                CrimeTable.Cols.UUID + " =?",
                 new String[] { id.toString() }
-        );
-
+            );
         try {
-            if (cursor.getCount() == 0){
+            if (cursor.getCount()  == 0) {
                 return null;
             }
 
@@ -108,20 +102,29 @@ public class CrimeLab {
     }
 
     public void updateCrime(Crime c){
-        String uuid = c.getID().toString();
-        ContentValues values = getContentValues(c);
 
-        mDatabase.update(CrimeTable.NAME, values,
+        ContentValues crimeValues = getCrimeContentValues(c);
+        ContentValues suspectValues = getSuspectContentValues(c);
+
+        mDatabase.update(CrimeTable.NAME, crimeValues,
                 CrimeTable.Cols.UUID + " = ?",
-                new String[] { uuid });
+                new String[] { c.getID().toString() });
+
+
+        int count = mDatabase.delete(
+                SuspectTable.NAME,
+                SuspectTable.Cols.SUSPECT_ID + " = " + c.getSuspectId(),
+                null);
+
+        mDatabase.insert(SuspectTable.NAME, null, suspectValues);
     }
 
     public void addCrime(Crime c){
-        ContentValues values = getContentValues(c);
-        mDatabase.insert(CrimeTable.NAME, null, values);
+        ContentValues crimeValues = getCrimeContentValues(c);
+        mDatabase.insert(CrimeTable.NAME, null, crimeValues);
     }
 
-    private static ContentValues getContentValues(Crime c){
+    private static ContentValues getCrimeContentValues(Crime c){
         ContentValues values = new ContentValues();
         values.put(CrimeTable.Cols.UUID, c.getID().toString());
         values.put(CrimeTable.Cols.TITLE, c.getTitle());
@@ -131,16 +134,28 @@ public class CrimeLab {
         return values;
     }
 
+    private static ContentValues getSuspectContentValues(Crime c){
+        ContentValues values = new ContentValues();
+        values.put(SuspectTable.Cols.SUSPECT_ID, c.getSuspectId());
+        values.put(SuspectTable.Cols.DISPLAY_NAME, c.getSuspectName());
+        values.put(SuspectTable.Cols.PHONE, c.getSuspectPhone());
+        return values;
+    }
+
     private CrimeCursorWrapper queryCrimes(String whereClause, String[] whereArgs){
-        Cursor cursor = mDatabase.query(
-                CrimeTable.NAME,
-                null,
-                whereClause,
-                whereArgs,
-                null,
-                null,
-                null
-        );
+
+        String sql = "SELECT * FROM " + CrimeTable.NAME + " c " +
+                "LEFT JOIN " + SuspectTable.NAME + " s " +
+                "ON c." + CrimeTable.Cols.SUSPECT_ID + " = s." + SuspectTable.Cols.SUSPECT_ID;
+
+
+        if(whereClause != null){
+            sql += " WHERE " + whereClause;
+        }
+
+        Cursor cursor = mDatabase.rawQuery(sql, whereArgs);
+
+
         return new CrimeCursorWrapper(cursor);
     }
 

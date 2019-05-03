@@ -11,7 +11,7 @@ import android.os.Bundle;
 
 import java.util.UUID;
 
-public class CrimePagerActivity extends AppCompatActivity {
+public class CrimePagerActivity extends AppCompatActivity implements CrimeFragment.Callbacks {
 
     private ViewPager mViewPager;
     private CrimeLab mCrimeLab;
@@ -54,4 +54,15 @@ public class CrimePagerActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
+    }
+
+    @Override
+    public void onCrimeDeleted(Fragment fragment) {
+
+    }
+
 }

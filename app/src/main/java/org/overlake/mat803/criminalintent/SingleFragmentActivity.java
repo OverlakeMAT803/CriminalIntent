@@ -1,9 +1,13 @@
 package org.overlake.mat803.criminalintent;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 public abstract class SingleFragmentActivity extends AppCompatActivity {
@@ -25,6 +29,14 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
         if(fragment == null){
             fragment = createFragment();
             fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    100);
         }
     }
 }

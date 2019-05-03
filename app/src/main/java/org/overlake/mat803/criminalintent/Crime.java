@@ -12,6 +12,8 @@ public class Crime {
     private Date mDate;
     private boolean mSolved;
     private int mSuspectId;
+    private String mSuspectName;
+    private String mSupsectPhone;
 
     public int getSuspectId() {
         return mSuspectId;
@@ -61,4 +63,23 @@ public class Crime {
     public void setSolved(boolean solved) {
         mSolved = solved;
     }
+
+    public String getSuspectName() {
+        return mSuspectName;
+    }
+
+    public void setSuspectName(String suspectName) {
+        mSuspectName = suspectName;
+    }
+
+    public String getSuspectPhone() {
+        return mSupsectPhone;
+    }
+
+    public void setSupsectPhone(String supsectPhone) {
+        mSupsectPhone = supsectPhone;
+    }
+
+
 }
+

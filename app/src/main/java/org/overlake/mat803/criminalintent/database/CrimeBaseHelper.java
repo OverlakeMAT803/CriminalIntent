@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import org.overlake.mat803.criminalintent.database.CrimeDbSchema.CrimeTable;
+import org.overlake.mat803.criminalintent.database.CrimeDbSchema.SuspectTable;
 
 public class CrimeBaseHelper extends SQLiteOpenHelper {
 
@@ -24,6 +25,13 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
                 CrimeTable.Cols.DATE + ", " +
                 CrimeTable.Cols.SOLVED + ", " +
                 CrimeTable.Cols.SUSPECT_ID + ")"
+        );
+
+        db.execSQL("CREATE TABLE " + SuspectTable.NAME + "(" +
+                "_id integer primary key autoincrement, " +
+                SuspectTable.Cols.SUSPECT_ID + ", " +
+                SuspectTable.Cols.DISPLAY_NAME + ", " +
+                SuspectTable.Cols.PHONE + ")"
         );
 
     }
